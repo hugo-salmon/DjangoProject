@@ -1,0 +1,95 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription</title>
+    <link rel="stylesheet" href="{% static 'css/inscription.css' %}">
+</head>
+<body>
+    <div class="container">
+        <form id="inscription-form" action="{% url 'inscription' %}" method="post">
+            {% csrf_token %}
+            <h2>Inscription</h2>
+            <div class="input-group">
+                <label for="username">Nom d'utilisateur*</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="input-group">
+                <label for="email">Email*</label>
+                <input type="email" id="email" name="email" required pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" title="Veuillez saisir une adresse e-mail valide" >
+            </div>
+            <div class="input-group">
+                <label for="password">Mot de passe*</label>
+                <div class="password-input">
+                    <input type="password" id="password" name="password" required>
+                    <img src="{% static 'images/show_password.png' %}" alt="Cacher le mot de passe" class="eye-icon" id="hidePassword">
+                </div>
+            </div>
+            <div class="input-group">
+                <label for="confirm-password">Confirmer le mot de passe*</label>
+                <input type="password" id="confirm-password" name="confirm-password" required>
+                <img src="{% static 'images/show_password.png' %}" alt="Cacher le mot de passe" class="confirm-eye-icon" id="hideConfirmPassword">
+            </div>
+            <div class="input-group">
+                <button type="submit">S'inscrire</button>
+            </div>
+            <p><i>*Champs requis</i></p>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var eyeIcon = document.getElementById('hidePassword');
+            eyeIcon.addEventListener('click', function() {
+                togglePasswordVisibility('password');
+            });
+    
+            var confirmEyeIcon = document.getElementById('hideConfirmPassword');
+            confirmEyeIcon.addEventListener('click', function() {
+                togglePasswordVisibility('confirm-password');
+            });
+    
+            function togglePasswordVisibility(fieldId) {
+                var passwordInput = document.getElementById(fieldId);
+                var iconId = fieldId === 'password' ? 'hidePassword' : 'hideConfirmPassword';
+    
+                if (passwordInput.type === "password") {
+                    passwordInput.type = "text";
+                    document.getElementById(iconId).src = "{% static 'images/hide_password.png' %}";
+                } else {
+                    passwordInput.type = "password";
+                    document.getElementById(iconId).src = "{% static 'images/show_password.png' %}";
+                }
+            }
+    
+            var form = document.getElementById('inscription-form');
+            form.addEventListener('submit', function(event) {
+                var password = document.getElementById('password').value;
+                var confirmPassword = document.getElementById('confirm-password').value;
+    
+                if (password !== confirmPassword) {
+                    alert("Les mots de passe ne correspondent pas.");
+                    event.preventDefault();
+                    return;
+                }
+    
+                if (password.length < 8) {
+                    alert("Le mot de passe doit contenir au moins 8 caractères.");
+                    event.preventDefault();
+                    return;
+                }
+    
+                var passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
+                if (!passwordRegex.test(password)) {
+                    alert("Le mot de passe doit contenir au moins une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial.");
+                    event.preventDefault();
+                    return;
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
