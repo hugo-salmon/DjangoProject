@@ -1,0 +1,278 @@
+{% load static %}
+{% if user.is_authenticated %}
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Réservation d'hébergement</title>
+        <link rel="stylesheet" href="{% static 'css/accommodation_reservation.css' %}">
+    </head>
+    <body>
+        <nav class="navbar">
+            <div class="container">
+                <ul class="nav-menu">
+                    <li><a href="{% url 'base' %}">Accueil</a></li>
+                    <li><a href="{% url 'flight_search' %}">Recherche de Vols</a></li>
+                    <li><a href="{% url 'accommodation_reservation' %}">Réservation d'Hébergement</a></li>
+                    <li><a href="#itineraire-voyage">Itinéraire de Voyage</a></li>
+                    <li><a href="#conseils-voyage">Conseils de Voyage</a></li>
+                    <li><a href="{% url 'logout' %}">Déconnexion</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <div id="reservation-hebergement" class="tab-content">
+            <h2>Réservation d'Hébergement</h2>
+            <form action="#" method="post">
+                {% csrf_token %}
+                <label for="destination">Destination :</label>
+                <input type="text" id="destination" name="destination" placeholder="Destination de votre séjour">
+                
+                <label for="check-in-date">Date d'arrivée :</label>
+                <input type="date" id="return-date" name="check-in-date">
+                
+                <label for="check-out-date">Date de départ :</label>
+                <input type="date" id="departure-date" name="check-out-date">
+                
+                <label for="number-of-guests">Nombre de personnes :</label>
+                <input type="number" id="number-of-guests" name="number-of-guests" placeholder="0" min="1" max="10">
+                
+                <button type="submit">Rechercher</button>
+                <button type="reset" id="reset-button">Réinitialiser les filtres</button>
+            </form>
+        
+            <table id="accommodation-table">
+                <thead>
+                    <tr>
+                        <th>Destination</th>
+                        <th>Date d'arrivée</th>
+                        <th>Date de départ</th>
+                        <th class="small-column">Nombre de personnes</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>New York</td>
+                        <td>2024-03-01</td>
+                        <td>2024-03-10</td>
+                        <td>2</td>
+                        <td><button class="reserve-button">Réserver</button></td>
+                    </tr>
+                    <tr>
+                        <td>Nice</td>
+                        <td>2024-04-15</td>
+                        <td>2024-04-25</td>
+                        <td>1</td>
+                        <td><button class="reserve-button">Réserver</button></td>
+                    </tr>
+                    <tr>
+                        <td>Paris</td>
+                        <td>2024-05-20</td>
+                        <td>2024-05-30</td>
+                        <td>5</td>
+                        <td><button class="reserve-button">Réserver</button></td>
+                    </tr>
+                    <tr>
+                        <td>Paris</td>
+                        <td>2024-06-10</td>
+                        <td>2024-06-20</td>
+                        <td>2</td>
+                        <td><button class="reserve-button">Réserver</button></td>
+                    </tr>
+                    <tr>
+                        <td>Londres</td>
+                        <td>2024-07-05</td>
+                        <td>2024-07-15</td>
+                        <td>4</td>
+                        <td><button class="reserve-button">Réserver</button></td>
+                    </tr>
+                    <tr>
+                        <td>Strasbourg</td>
+                        <td>2024-08-18</td>
+                        <td>2024-08-28</td>
+                        <td>3</td>
+                        <td><button class="reserve-button">Réserver</button></td>
+                    </tr>
+                    <tr>
+                        <td>Rome</td>
+                        <td>2024-09-12</td>
+                        <td>2024-09-22</td>
+                        <td>1</td>
+                        <td><button class="reserve-button">Réserver</button></td>
+                    </tr>
+                    <tr>
+                        <td>Bordeaux</td>
+                        <td>2024-10-03</td>
+                        <td>2024-10-13</td>
+                        <td>2</td>
+                        <td><button class="reserve-button">Réserver</button></td>
+                    </tr>
+                    <tr>
+                        <td>New Delhi</td>
+                        <td>2024-11-24</td>
+                        <td>2024-12-04</td>
+                        <td>5</td>
+                        <td><button class="reserve-button">Réserver</button></td>
+                    </tr>
+                    <tr>
+                        <td>Toulouse</td>
+                        <td>2024-12-15</td>
+                        <td>2025-01-02</td>
+                        <td>4</td>
+                        <td><button class="reserve-button">Réserver</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div id="scroll-to-top">
+            <a href="#top">&#9650;</a>
+        </div>
+
+        <footer class="footer">
+            <div class="container">
+                <p>&copy; 2024 Application de Voyage. Tous droits réservés.</p>
+            </div>
+        </footer>
+
+    </body>
+    </html>
+{% endif %}
+
+<script>
+    // Attend que le contenu de la page soit chargé avant d'exécuter le script
+    document.addEventListener('DOMContentLoaded', function() {
+        // Récupère le formulaire, les lignes de tableau, le bouton de réinitialisation et le bouton de retour en haut de page
+        const form = document.querySelector('form');
+        const tableRows = document.querySelectorAll('tbody tr');
+        const resetButton = document.getElementById('reset-button');
+        var scrollToTopBtn = document.getElementById('scroll-to-top');
+        const reserveButtons = document.querySelectorAll('.reserve-button');
+        let foundResults = false;
+
+        // Événement lors de la soumission du formulaire de recherche
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Empêche la soumission du formulaire par défaut
+
+            foundResults = false;
+
+            // Récupère les valeurs des champs de recherche
+            const destination = document.getElementById('destination').value.trim().toLowerCase();
+            const returnDate = convertToDate(document.getElementById('return-date').value);
+            const departureDate = convertToDate(document.getElementById('departure-date').value);
+            const numberOfGuests = document.getElementById('number-of-guests').value.trim().toLowerCase();
+
+            // Parcourt les lignes du tableau pour filtrer les résultats en fonction des critères de recherche
+            tableRows.forEach(function(row) {
+                const rowDestination = row.cells[0].textContent.trim().toLowerCase();
+                const rowReturnDate = convertToDate(row.cells[1].textContent.trim());
+                const rowDepartureDate = convertToDate(row.cells[2].textContent.trim());
+                const rowNumberOfGuests = row.cells[3].textContent.trim().toLowerCase();
+
+                // Vérifie si la ligne correspond aux critères de recherche
+                if ((destination === '' || rowDestination.includes(destination)) &&
+                    (isNaN(returnDate) || datesAreEqual(rowReturnDate, returnDate)) &&
+                    (isNaN(departureDate) || datesAreEqual(rowDepartureDate, departureDate)) &&
+                    (numberOfGuests === '' || rowNumberOfGuests.includes(numberOfGuests))) {
+                    row.style.display = 'table-row';
+                    foundResults = true;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Affiche un message s'il n'y a aucun résultat correspondant à la recherche
+            const existingNoResultRow = document.querySelector('.no-result-row');
+            if (!foundResults && !existingNoResultRow) {
+                const noResultRow = document.createElement('tr');
+                noResultRow.classList.add('no-result-row');
+                const cell = document.createElement('td');
+                cell.setAttribute('colspan', '6');
+                cell.textContent = 'Aucun résultat ne correspond à votre recherche.';
+                cell.classList.add('no-result-message');
+                noResultRow.appendChild(cell);
+                document.querySelector('tbody').appendChild(noResultRow);
+            } else if (foundResults && existingNoResultRow) {
+                existingNoResultRow.parentNode.removeChild(existingNoResultRow);
+            }
+        });
+
+        // Événement lors du clic sur le bouton de retour en haut de page
+        scrollToTopBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        // Ajouter un écouteur d'événements pour le bouton de réinitialisation
+        resetButton.addEventListener('click', function(event) {
+            window.location.reload(); 
+        });
+        
+        // Affiche ou masque le bouton de retour en haut de page en fonction de la position de défilement
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 100) {
+                scrollToTopBtn.style.display = 'block';
+            } else {
+                scrollToTopBtn.style.display = 'none';
+            }
+        });
+
+        // Fonction pour convertir une chaîne de date en objet Date
+        function convertToDate(dateString) {
+            const parts = dateString.split('-');
+            if (parts.length === 3) {
+                const year = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10) - 1;
+                const day = parseInt(parts[2], 10);
+                return new Date(year, month, day);
+            } else {
+                return NaN;
+            }
+        }
+
+        // Fonction pour vérifier si deux dates sont égales
+        function datesAreEqual(date1, date2) {
+            return date1.getFullYear() === date2.getFullYear() &&
+                date1.getMonth() === date2.getMonth() &&
+                date1.getDate() === date2.getDate();
+        }
+
+        // Événement lors du clic sur un bouton de réservation
+        document.addEventListener('click', function(event) {
+            const target = event.target;
+            if (target && target.classList.contains('reserve-button')) {
+                reserveFlight(target);
+            } else if (target && target.classList.contains('cancel-button')) {
+                cancelReservation(target);
+            }
+        });
+
+        // Fonction pour réserver un hébergement
+        function reserveFlight(button) {
+            const reservedInfo = document.createElement('span');
+            reservedInfo.classList.add('reserved-info');
+            reservedInfo.textContent = 'Réservé ✅';
+            button.parentNode.replaceChild(reservedInfo, button);
+
+            const cancelButton = document.createElement('button');
+            cancelButton.classList.add('cancel-button');
+            cancelButton.textContent = '❌ Annuler';
+            reservedInfo.parentNode.appendChild(cancelButton);
+        }
+
+        // Fonction pour annuler une réservation
+        function cancelReservation(button) {
+            const reservedInfo = button.previousSibling;
+            const reserveButton = document.createElement('button');
+            reserveButton.classList.add('reserve-button');
+            reserveButton.textContent = 'Réserver';
+            reservedInfo.parentNode.replaceChild(reserveButton, reservedInfo);
+            button.parentNode.removeChild(button);
+        }
+    });
+</script>

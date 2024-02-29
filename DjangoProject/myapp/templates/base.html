@@ -1,0 +1,50 @@
+{% load static %}
+{% if user.is_authenticated %}
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Bienvenue sur l'Application de Voyage</title>
+        <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    </head>
+    <body>
+        <nav class="navbar">
+            <div class="container">
+                <ul class="nav-menu">
+                    <li><a href="{% url 'base' %}">Accueil</a></li>
+                    <li><a href="{% url 'flight_search' %}">Recherche de Vols</a></li>
+                    <li><a href="{% url 'accommodation_reservation' %}">Réservation d'Hébergement</a></li>
+                    <li><a href="#itineraire-voyage">Itinéraire de Voyage</a></li>
+                    <li><a href="#conseils-voyage">Conseils de Voyage</a></li>
+                    <li><a href="{% url 'logout' %}">Déconnexion</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="container">
+            <h1>Bienvenue sur l'Application de Voyage</h1>
+            <p>L'Application de Voyage vous offre une plateforme complète pour planifier, réserver, suivre et payer vos voyages avec simplicité et efficacité.</p>
+            <p>Découvrez nos fonctionnalités :</p>
+            <ul>
+                <li><strong>Recherche de Vols :</strong> Trouvez facilement les vols correspondant à vos besoins, avec des options de filtrage avancées.</li>
+                <li><strong>Réservation d'Hébergement :</strong> Réservez parmi une large sélection d'hôtels, d'auberges et d'appartements dans le monde entier.</li>
+                <li><strong>Itinéraire de Voyage :</strong> Créez votre itinéraire personnalisé en fonction de vos préférences et de vos activités prévues.</li>
+                <li><strong>Conseils de Voyage :</strong> Recevez des recommandations personnalisées basées sur votre destination, vos intérêts et les avis d'autres voyageurs.</li>
+            </ul>
+            <p>Commencez dès maintenant à explorer le monde avec notre application intuitive et conviviale !</p>
+        </div>
+
+
+        <footer class="footer">
+            <div class="container">
+                <p>&copy; 2024 Application de Voyage. Tous droits réservés.</p>
+            </div>
+        </footer>
+
+    </body>
+    </html>
+{% else %}
+    <p>Veuillez vous connecter pour accéder à cette page.</p>
+    <a href="{% url 'connexion' %}">Connexion</a>
+{% endif %}

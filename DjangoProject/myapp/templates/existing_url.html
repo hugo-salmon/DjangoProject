@@ -1,0 +1,18 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Utilisateur déjà existant</title>
+    <link rel="stylesheet" href="{% static 'css/existing_url.css' %}">
+</head>
+</head>
+<body>
+    <div>
+        <h1>Utilisateur déjà existant</h1>
+        <p>L'utilisateur que vous avez entré existe déjà. Veuillez en choisir un autre ou vous connecter si vous êtes déjà inscrit.</p>
+        <a href="{% url 'inscription' %}">Retour à la page d'inscription</a>
+    </div>
+</body>
+</html>

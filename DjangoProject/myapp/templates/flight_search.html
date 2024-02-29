@@ -1,0 +1,290 @@
+{% load static %}
+{% if user.is_authenticated %}
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Recherche de vols</title>
+        <link rel="stylesheet" href="{% static 'css/flight_search.css' %}">
+    </head>
+    <body>
+        <nav class="navbar">
+            <div class="container">
+                <ul class="nav-menu">
+                    <li><a href="{% url 'base' %}">Accueil</a></li>
+                    <li><a href="{% url 'flight_search' %}">Recherche de Vols</a></li>
+                    <li><a href="{% url 'accommodation_reservation' %}">Réservation d'Hébergement</a></li>
+                    <li><a href="#itineraire-voyage">Itinéraire de Voyage</a></li>
+                    <li><a href="#conseils-voyage">Conseils de Voyage</a></li>
+                    <li><a href="{% url 'logout' %}">Déconnexion</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <h1>Recherche de Vols</h1>
+        <form action="#" method="get">
+            <label for="departure">Départ :</label>
+            <input type="text" id="departure" name="departure" placeholder="Ville de départ">
+            <label for="destination">Destination :</label>
+            <input type="text" id="destination" name="destination" placeholder="Ville de destination">
+            <label for="departure-date">Date de départ :</label>
+            <input type="date" id="departure-date" name="departure-date" placeholder="AAAA-MM-JJ">
+            <label for="return-date">Date de retour :</label>
+            <input type="date" id="return-date" name="return-date" placeholder="AAAA-MM-JJ">
+            <label for="transport-type">Type de Transport :</label>
+            <select id="transport-type" name="transport-type">
+                <option value="">Tous</option>
+                <option value="train">Train</option>
+                <option value="avion">Avion</option>
+            </select>
+            <button type="submit">Rechercher</button>
+            <button type="reset" id="reset-button">Réinitialiser les filtres</button>
+        </form>
+        <div id="flight-results">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Départ</th>
+                        <th>Destination</th>
+                        <th>Type de Transport</th>
+                        <th>Date de départ</th>
+                        <th>Date de retour</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Paris</td>
+                        <td>New York</td>
+                        <td>Avion</td>
+                        <td>2024-03-01</td>
+                        <td>2024-03-10</td>
+                        <td><button class="reserve-button">Réserver</button></td>
+                    </tr>
+                    <tr>
+                        <td>Lyon</td>
+                        <td>Nice</td>
+                        <td>Train</td>
+                        <td>2024-04-15</td>
+                        <td>2024-04-25</td>
+                        <td><button class="reserve-button">Réserver</button></td>
+                    </tr>
+                    <tr>
+                        <td>Sydney</td>
+                        <td>Paris</td>
+                        <td>Avion</td>
+                        <td>2024-05-20</td>
+                        <td>2024-05-30</td>
+                        <td><button class="reserve-button">Réserver</button></td>
+                    </tr>
+                    <tr>
+                        <td>Brest</td>
+                        <td>Paris</td>
+                        <td>Train</td>
+                        <td>2024-06-10</td>
+                        <td>2024-06-20</td>
+                        <td><button class="reserve-button">Réserver</button></td>
+                    </tr>
+                    <tr>
+                        <td>Tokyo</td>
+                        <td>Londres</td>
+                        <td>Avion</td>
+                        <td>2024-07-05</td>
+                        <td>2024-07-15</td>
+                        <td><button class="reserve-button">Réserver</button></td>
+                    </tr>
+                    <tr>
+                        <td>Marseille</td>
+                        <td>Strasbourg</td>
+                        <td>Train</td>
+                        <td>2024-08-18</td>
+                        <td>2024-08-28</td>
+                        <td><button class="reserve-button">Réserver</button></td>
+                    </tr>
+                    <tr>
+                        <td>Madrid</td>
+                        <td>Rome</td>
+                        <td>Avion</td>
+                        <td>2024-09-12</td>
+                        <td>2024-09-22</td>
+                        <td><button class="reserve-button">Réserver</button></td>
+                    </tr>
+                    <tr>
+                        <td>Toulon</td>
+                        <td>Bordeaux</td>
+                        <td>Train</td>
+                        <td>2024-10-03</td>
+                        <td>2024-10-13</td>
+                        <td><button class="reserve-button">Réserver</button></td>
+                    </tr>
+                    <tr>
+                        <td>Dubai</td>
+                        <td>New Delhi</td>
+                        <td>Avion</td>
+                        <td>2024-11-24</td>
+                        <td>2024-12-04</td>
+                        <td><button class="reserve-button">Réserver</button></td>
+                    </tr>
+                    <tr>
+                        <td>Lorient</td>
+                        <td>Toulouse</td>
+                        <td>Train</td>
+                        <td>2024-12-15</td>
+                        <td>2025-01-02</td>
+                        <td><button class="reserve-button">Réserver</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="scroll-to-top">
+            <a href="#top">&#9650;</a>
+        </div>
+
+        <footer class="footer">
+            <div class="container">
+                <p>&copy; 2024 Application de Voyage. Tous droits réservés.</p>
+            </div>
+        </footer>
+
+    </body>
+    </html>
+{% endif %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Récupérer les éléments HTML nécessaires
+        const form = document.querySelector('form'); 
+        const tableRows = document.querySelectorAll('tbody tr'); 
+        const resetButton = document.getElementById('reset-button'); 
+        const scrollToTopBtn = document.getElementById('scroll-to-top'); 
+        const reserveButtons = document.querySelectorAll('.reserve-button'); 
+        let foundResults = false; 
+
+        // Ajouter un écouteur d'événements pour la soumission du formulaire de recherche
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); 
+
+            foundResults = false; 
+
+            // Récupérer les valeurs des champs de recherche
+            const departure = document.getElementById('departure').value.trim().toLowerCase();
+            const destination = document.getElementById('destination').value.trim().toLowerCase();
+            const departureDate = convertToDate(document.getElementById('departure-date').value);
+            const returnDate = convertToDate(document.getElementById('return-date').value);
+            const transportType = document.getElementById('transport-type').value.trim().toLowerCase();
+
+            // Parcourir les lignes du tableau des résultats pour les filtrer
+            tableRows.forEach(function(row) {
+                const rowDeparture = row.cells[0].textContent.trim().toLowerCase();
+                const rowDestination = row.cells[1].textContent.trim().toLowerCase();
+                const rowDepartureDate = convertToDate(row.cells[3].textContent.trim());
+                const rowReturnDate = convertToDate(row.cells[4].textContent.trim());
+                const rowTransportType = row.cells[2].textContent.trim().toLowerCase();
+
+                // Vérifier si la ligne correspond aux critères de recherche
+                if ((departure === '' || rowDeparture.includes(departure)) &&
+                    (destination === '' || rowDestination.includes(destination)) &&
+                    (transportType === '' || rowTransportType === transportType) &&
+                    (isNaN(departureDate) || datesAreEqual(rowDepartureDate, departureDate)) &&
+                    (isNaN(returnDate) || datesAreEqual(rowReturnDate, returnDate))) {
+                    row.style.display = 'table-row'; 
+                    foundResults = true; 
+                } else {
+                    row.style.display = 'none'; 
+                }
+            });
+
+            // Gérer l'affichage du message s'il n'y a aucun résultat correspondant
+            const existingNoResultRow = document.querySelector('.no-result-row');
+            if (!foundResults && !existingNoResultRow) {
+                const noResultRow = document.createElement('tr');
+                noResultRow.classList.add('no-result-row'); 
+                const cell = document.createElement('td');
+                cell.setAttribute('colspan', '6'); 
+                cell.textContent = 'Aucun résultat ne correspond à votre recherche.';
+                cell.classList.add('no-result-message'); 
+                noResultRow.appendChild(cell);
+                document.querySelector('tbody').appendChild(noResultRow);
+            } else if (foundResults && existingNoResultRow) {
+                existingNoResultRow.parentNode.removeChild(existingNoResultRow);
+            }
+        });
+
+        // Ajouter un écouteur d'événements pour le bouton de retour en haut
+        scrollToTopBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Ajouter un écouteur d'événements pour détecter le défilement de la fenêtre
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 100) {
+                scrollToTopBtn.style.display = 'block'; 
+            } else {
+                scrollToTopBtn.style.display = 'none'; 
+            }
+        });
+
+        // Fonction pour convertir une chaîne de date au format 'YYYY-MM-DD' en objet Date JavaScript
+        function convertToDate(dateString) {
+            const parts = dateString.split('-');
+            if (parts.length === 3) {
+                const year = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10) - 1; 
+                const day = parseInt(parts[2], 10);
+                return new Date(year, month, day);
+            } else {
+                return NaN; 
+            }
+        }
+
+        // Fonction pour vérifier si deux objets Date représentent la même date
+        function datesAreEqual(date1, date2) {
+            return date1.getFullYear() === date2.getFullYear() &&
+                date1.getMonth() === date2.getMonth() &&
+                date1.getDate() === date2.getDate();
+        }
+
+        // Ajouter un écouteur d'événements pour le bouton de réinitialisation
+        resetButton.addEventListener('click', function(event) {
+            window.location.reload(); 
+        });
+
+        // Ajouter un écouteur d'événements pour gérer les actions des boutons de réservation et d'annulation
+        document.addEventListener('click', function(event) {
+            const target = event.target;
+            if (target && target.classList.contains('reserve-button')) {
+                reserveFlight(target);
+            } else if (target && target.classList.contains('cancel-button')) {
+                cancelReservation(target);
+            }
+        });
+
+        // Fonction pour réserver un vol
+        function reserveFlight(button) {
+            const reservedInfo = document.createElement('span');
+            reservedInfo.classList.add('reserved-info');
+            reservedInfo.textContent = 'Réservé ✅';
+            button.parentNode.replaceChild(reservedInfo, button);
+
+            const cancelButton = document.createElement('button');
+            cancelButton.classList.add('cancel-button');
+            cancelButton.textContent = '❌ Annuler';
+            reservedInfo.parentNode.appendChild(cancelButton);
+        }
+
+        // Fonction pour annuler une réservation
+        function cancelReservation(button) {
+            const reservedInfo = button.previousSibling;
+            const reserveButton = document.createElement('button');
+            reserveButton.classList.add('reserve-button');
+            reserveButton.textContent = 'Réserver';
+            reservedInfo.parentNode.replaceChild(reserveButton, reservedInfo);
+            button.parentNode.removeChild(button);
+        }
+    });
+</script>
