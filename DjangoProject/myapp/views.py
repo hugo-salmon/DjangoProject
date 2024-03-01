@@ -21,7 +21,7 @@ def register_user(request):
             return render(request, 'inscription.html', {'error': 'Les mots de passe ne correspondent pas.'})
 
         if CustomUser.objects.filter(username=username).exists():
-            return render(request, 'existing_url.html')
+            return render(request, 'existing_user.html')
 
         user = CustomUser.objects.create_user(username=username, email=email, password=password)
         user.save()
@@ -35,7 +35,7 @@ def existing_user(request):
     """
     Affiche une page pour les utilisateurs existants.
     """
-    return render(request, 'existing_url.html')
+    return render(request, 'existing_user.html')
 
 def login_user(request):
     """
