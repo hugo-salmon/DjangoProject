@@ -5,7 +5,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Bienvenue sur l'Application de Voyage</title>
+        <title>Accueil</title>
         <link rel="stylesheet" href="{% static 'css/base.css' %}">
     </head>
     <body>
@@ -15,9 +15,9 @@
                     <li><a href="{% url 'base' %}">Accueil</a></li>
                     <li><a href="{% url 'flight_search' %}">Recherche de Vols</a></li>
                     <li><a href="{% url 'accommodation_reservation' %}">Réservation d'Hébergement</a></li>
-                    <li><a href="#itineraire-voyage">Itinéraire de Voyage</a></li>
-                    <li><a href="#conseils-voyage">Conseils de Voyage</a></li>
-                    <li><a href="{% url 'logout' %}">Déconnexion</a></li>
+                    <li><a href="{% url 'travel_itinerary' %}">Itinéraire de Voyage</a></li>
+                    <li><a href="{% url 'travel_tips' %}">Conseils de Voyage</a></li>
+                    <li><a href="{% url 'logout' %}" onclick="return confirm('Êtes-vous sûr de vouloir vous déconnecter ?')">Déconnexion</a></li>
                 </ul>
             </div>
         </nav>

@@ -1,0 +1,340 @@
+{% load static %}
+{% if user.is_authenticated %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Itinéraire de voyage</title>
+    <link rel="stylesheet" href="{% static 'css/travel_itinerary.css' %}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <ul class="nav-menu">
+                <li><a href="{% url 'base' %}">Accueil</a></li>
+                <li><a href="{% url 'flight_search' %}">Recherche de Vols</a></li>
+                <li><a href="{% url 'accommodation_reservation' %}">Réservation d'Hébergement</a></li>
+                <li><a href="{% url 'travel_itinerary' %}">Itinéraire de Voyage</a></li>
+                <li><a href="{% url 'travel_tips' %}">Conseils de Voyage</a></li>
+                <li><a href="{% url 'logout' %}" onclick="return confirm('Êtes-vous sûr de vouloir vous déconnecter ?')">Déconnexion</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="add-accommodation">
+            <h2>Ajouter l'endroit du séjour</h2>
+            <form id="add-accommodation-form" method="post">
+                {% csrf_token %}
+                <label for="accommodation-location">Endroit du séjour*:</label>
+                <input required type="text" id="accommodation-location" name="accommodation-location" placeholder="Endroit du séjour">
+                <label for="start-date" name="start-date">Date de début du séjour*:</label>
+                <input required type="date" id="start-date" name="start-date">
+                <label for="end-date" name="end-date">Date de fin du séjour*:</label>
+                <input required type="date" id="end-date" name="end-date">
+                <button id="addLocationButton" type="submit">Ajouter</button>
+            </form>
+        </div>
+
+        <h1>Itinéraire de Voyage</h1>
+        <p id="accommodation-location-display">Endroit du séjour : </p>
+        <p id="accommodation-location-value"></p>
+        <span id="edit-accommodation" style="cursor: pointer; display: none;">Modifier</span> 
+        <span id="delete-accommodation" style="cursor: pointer; display: none;">Supprimer</span> 
+        <p id="accommodation-duration" style="display: none;">Séjour du <span id="start-date-display"></span> au <span id="end-date-display"></span></p>
+        <span id="edit-date" style="cursor: pointer; display: none;">Modifier</span> 
+        <span id="delete-date" style="cursor: pointer; display: none;">Supprimer</span> 
+        <div class="itinerary-details">
+            <h2>Votre itinéraire</h2>
+            <ul id="itinerary-list"></ul>
+        </div>
+
+        <div class="add-itinerary">
+            <h2>Ajouter une activité</h2>
+            <form id="add-itinerary-form" method="post">
+                {% csrf_token %}
+                <label for="day">Jour*:</label>
+                <input required type="text" id="day" name="day" placeholder="Jour">
+                <label for="activity">Activité*:</label>
+                <input required type="text" id="activity" name="activity" placeholder="Activité">
+                <button id="addButton" type="submit">Ajouter</button>
+            </form>
+        </div>
+    </div>
+    <div id="scroll-to-top">
+        <a href="#top">&#9650;</a>
+    </div>
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Application de Voyage. Tous droits réservés.</p>
+        </div>
+    </footer>
+</body>
+</html>
+{% endif %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dayInput = document.getElementById('day');
+        const activityInput = document.getElementById('activity');
+        const addButton = document.getElementById('addButton');
+        const addLocationButton = document.getElementById('addLocationButton');
+        const locationInput = document.getElementById('accommodation-location');
+        const startDateInput = document.getElementById('start-date');
+        const endDateInput = document.getElementById('end-date');
+        const startDateDisplay = document.getElementById('start-date-display');
+        const endDateDisplay = document.getElementById('end-date-display');
+        const editDateSpan = document.getElementById('edit-date');
+        const deleteDateSpan = document.getElementById('delete-date');
+
+        const accommodationValue = document.getElementById('accommodation-location-value');
+        const editAccommodationSpan = document.getElementById('edit-accommodation');
+        const deleteAccommodationSpan = document.getElementById('delete-accommodation');
+
+
+        // Fonction pour afficher ou cacher le texte "Modifier" en fonction du contenu de l'endroit du séjour
+        function toggleEditButton() {
+            if (accommodationValue.textContent.trim() !== '') {
+                editAccommodationSpan.style.display = 'inline';
+            } else {
+                editAccommodationSpan.style.display = 'none';
+            }
+        }
+
+        toggleEditButton();
+
+        // Gestion de l'événement lorsque l'utilisateur clique sur "Modifier"
+        editAccommodationSpan.addEventListener('click', function() {
+            let defaultText = accommodationValue.textContent;
+
+            let newLocation = prompt("Entrez le nouvel endroit du séjour :", defaultText);
+            
+            newLocation = capitalizeFirstLetter(newLocation.trim());
+
+            if (newLocation !== null && newLocation !== '') { 
+                accommodationValue.textContent = newLocation;
+                toggleEditButton();
+            }
+        });
+
+        function toggleDeleteButton() {
+            if (accommodationValue.textContent.trim() !== '') {
+                deleteAccommodationSpan.style.display = 'inline';
+            } else {
+                deleteAccommodationSpan.style.display = 'none';
+            }
+        }
+
+        toggleDeleteButton();
+
+        deleteAccommodationSpan.addEventListener('click', function() {
+            const confirmation = confirm("Êtes-vous sûr de vouloir supprimer l'endroit du séjour ?");
+
+            if (confirmation) {
+                accommodationValue.textContent = '';
+                editAccommodationSpan.style.display = 'none';
+
+                toggleDeleteButton();
+            }
+        });
+
+        function toggleDateButtons() {
+            if (startDateDisplay.textContent.trim() !== '' && endDateDisplay.textContent.trim() !== '') {
+                editDateSpan.style.display = 'inline';
+                deleteDateSpan.style.display = 'inline';
+            } else {
+                editDateSpan.style.display = 'none';
+                deleteDateSpan.style.display = 'none';
+            }
+        }
+
+        toggleDateButtons();
+
+        editDateSpan.addEventListener('click', function() {
+            let currentStartDate = startDateDisplay.textContent;
+            let currentEndDate = endDateDisplay.textContent;
+
+            let newStartDate = prompt("Entrez la nouvelle date de début :", currentStartDate);
+            let newEndDate = prompt("Entrez la nouvelle date de fin :", currentEndDate);
+
+            if (newStartDate !== null && newStartDate !== '' && newEndDate !== null && newEndDate !== '') {
+                startDateDisplay.textContent = newStartDate;
+                endDateDisplay.textContent = newEndDate;
+            }
+        });
+
+        // Ajout d'un gestionnaire d'événements pour le bouton "Supprimer"
+        deleteDateSpan.addEventListener('click', function() {
+            startDateDisplay.textContent = '';
+            endDateDisplay.textContent = '';
+        });
+
+        function addTravelInfos() {
+            const locationValue = locationInput.value.trim();
+            const startDateValue = startDateInput.value.trim();
+            const endDateValue = endDateInput.value.trim();
+            
+            if (locationValue !== '' && startDateValue !== '' && endDateValue !== '') {
+                addLocationButton.removeAttribute('disabled');
+                addLocationButton.classList.remove('disabled-button');
+            } else {
+                addLocationButton.setAttribute('disabled', 'disabled');
+                addLocationButton.classList.add('disabled-button');
+            }
+        }
+
+        function toggleButton() {
+            const dayValue = dayInput.value.trim();
+            const activityValue = activityInput.value.trim();
+            if (dayValue === '' || activityValue === '') {
+                addButton.setAttribute('disabled', 'disabled');
+                addButton.classList.add('disabled-button');
+            } else {
+                addButton.removeAttribute('disabled');
+                addButton.classList.remove('disabled-button');
+            }
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0'); 
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        function createEditDeleteText() {
+            const itineraryList = document.getElementById('itinerary-list');
+            const newItineraryItem = itineraryList.lastElementChild; 
+            
+            const itineraryText = newItineraryItem.textContent;
+
+            newItineraryItem.innerHTML = '';
+
+            const itineraryTextSpan = document.createElement('span');
+            const dayText = itineraryText.split(':')[0]; 
+            const activityText = itineraryText.split(':')[1]; 
+
+            const dayElement = document.createElement('strong'); 
+            dayElement.textContent = dayText.trim(); 
+            itineraryTextSpan.appendChild(dayElement); 
+
+            itineraryTextSpan.innerHTML += `: ${activityText}`; 
+            
+            newItineraryItem.appendChild(itineraryTextSpan);
+
+            const editText = document.createElement('span');
+            editText.textContent = 'Modifier';
+            editText.classList.add('edit-text');
+            editText.addEventListener('click', function() {
+                let newText = prompt("Entrez le nouveau texte de l'activité :", activityText.trim());
+                if (newText !== null && newText.trim() !== '') {
+                    itineraryTextSpan.textContent = `${dayText.trim()}: ${newText}`;
+                }
+            });
+            
+            const deleteText = document.createElement('span');
+            deleteText.textContent = 'Supprimer';
+            deleteText.classList.add('delete-text');
+            deleteText.addEventListener('click', function() {
+                newItineraryItem.remove();
+            });
+            
+            newItineraryItem.appendChild(editText);
+            newItineraryItem.appendChild(deleteText);
+        }
+
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+        toggleButton();
+        addTravelInfos();
+
+        dayInput.addEventListener('input', function() {
+            this.value = capitalizeFirstLetter(this.value.trim());
+            toggleButton();
+        });
+
+        activityInput.addEventListener('input', function() {
+            this.value = capitalizeFirstLetter(this.value.trim());
+            toggleButton();
+        });
+
+        locationInput.addEventListener('input', function(){
+            this.value = capitalizeFirstLetter(this.value.trim());
+            addTravelInfos(); 
+        });
+        startDateInput.addEventListener('input', function(){
+            addTravelInfos(); 
+        });
+        endDateInput.addEventListener('input', function(){
+            addTravelInfos(); 
+        });
+        endDateInput.addEventListener('input', function() {
+            const startDateValue = new Date(startDateInput.value);
+            const endDateValue = new Date(this.value);
+            
+            if (endDateValue < startDateValue) {
+
+                alert("La date de fin ne peut pas être antérieure à la date de début !");
+                addLocationButton.setAttribute('disabled', 'disabled');
+                addLocationButton.classList.add('disabled-button');
+            } else {
+                addLocationButton.removeAttribute('disabled');
+                addLocationButton.classList.remove('disabled-button');
+            }
+        });
+        const accommodationForm = document.getElementById('add-accommodation-form');
+        accommodationForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const accommodationLocation = document.getElementById('accommodation-location').value.trim();
+            const startDate = document.getElementById('start-date').value.trim();
+            const endDate = document.getElementById('end-date').value.trim();
+            
+            if (accommodationLocation !== '' && startDate !== '' && endDate !== '') { 
+                const accommodationDisplay = document.getElementById('accommodation-location-value');
+                const startDateDisplay = document.getElementById('start-date-display');
+                const endDateDisplay = document.getElementById('end-date-display');
+                const accommodationDuration = document.getElementById('accommodation-duration');
+                
+                const capitalizedLocation = capitalizeFirstLetter(accommodationLocation);
+                accommodationDisplay.textContent = capitalizedLocation;
+                
+                const formattedStartDate = formatDate(startDate);
+                const formattedEndDate = formatDate(endDate);
+                
+                startDateDisplay.textContent = formattedStartDate;
+                endDateDisplay.textContent = formattedEndDate;
+                
+                accommodationDuration.style.display = 'block';
+                
+                document.getElementById('accommodation-location').value = '';
+                document.getElementById('start-date').value = '';
+                document.getElementById('end-date').value = '';
+                addTravelInfos();
+                toggleEditButton();
+                toggleDeleteButton();
+                toggleDateButtons();
+            } else {
+                alert("Veuillez remplir tous les champs.");
+            }
+        });
+
+        const itineraryForm = document.getElementById('add-itinerary-form');
+        itineraryForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const day = capitalizeFirstLetter(dayInput.value.trim());
+            const activity = capitalizeFirstLetter(activityInput.value.trim());
+            if (day !== '' && activity !== '') {
+                const newItineraryItem = document.createElement('li');
+                newItineraryItem.innerHTML = `<strong>${day}:</strong> ${activity}`;
+                const itineraryList = document.getElementById('itinerary-list');
+                itineraryList.appendChild(newItineraryItem);
+                dayInput.value = '';
+                activityInput.value = '';
+                toggleButton();
+                createEditDeleteText();
+            }
+        });
+    });
+</script>

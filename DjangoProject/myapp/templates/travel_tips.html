@@ -1,0 +1,202 @@
+{% load static %}
+{% if user.is_authenticated %}
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Conseils de voyage</title>
+        <link rel="stylesheet" href="{% static 'css/travel_tips.css' %}">
+    </head>
+    <body>
+        <nav class="navbar">
+            <div class="container">
+                <ul class="nav-menu">
+                    <li><a href="{% url 'base' %}">Accueil</a></li>
+                    <li><a href="{% url 'flight_search' %}">Recherche de Vols</a></li>
+                    <li><a href="{% url 'accommodation_reservation' %}">Réservation d'Hébergement</a></li>
+                    <li><a href="{% url 'travel_itinerary' %}">Itinéraire de Voyage</a></li>
+                    <li><a href="{% url 'travel_tips' %}">Conseils de Voyage</a></li>
+                    <li><a href="{% url 'logout' %}" onclick="return confirm('Êtes-vous sûr de vouloir vous déconnecter ?')">Déconnexion</a></li>
+                </ul>
+            </div>
+        </nav>
+        <div class="container">
+            <h1>Conseils de Voyage</h1>
+
+            <div id="location">
+                <p>Obtention de la géolocalisation...</p>
+            </div>
+        
+            <div id="travel-tips">
+                <h2>Conseils de Voyage pour votre région :</h2>
+                <button id="addTipButton">Ajouter un conseil de voyage</button>
+                <ul id="tips-list"></ul>
+            </div>
+        </div>
+        <div id="scroll-to-top">
+            <a href="#top">&#9650;</a>
+        </div>
+
+        <footer class="footer">
+            <div class="container">
+                <p>&copy; 2024 Application de Voyage. Tous droits réservés.</p>
+            </div>
+        </footer>
+
+        <script>
+            const addTipButton = document.getElementById('addTipButton');
+
+            // Sélectionner la liste des conseils de voyage
+            const tipsList = document.getElementById('tips-list');
+
+            // Ajouter un gestionnaire d'événements au clic sur le bouton
+            addTipButton.addEventListener('click', function() {
+                let newTip = prompt("Entrez un nouveau conseil de voyage :");
+
+                if (newTip && newTip.trim() !== '') {
+                    newTip = capitalizeFirstLetter(newTip.trim());
+
+                    const newTipItem = document.createElement('li');
+                    newTipItem.textContent = newTip;
+
+                    tipsList.appendChild(newTipItem);
+
+                    addEditButtonToTip(newTipItem);
+                    addDeleteButtonToTip(newTipItem);
+                }
+            });
+
+            // Fonction pour mettre la première lettre en majuscule
+            function capitalizeFirstLetter(string) {
+                return string.charAt(0).toUpperCase() + string.slice(1);
+            }
+
+            // Fonction pour ajouter le bouton "Modifier" à côté du conseil de voyage
+            function addEditButtonToTip(tip) {
+                const editButton = document.createElement('button');
+                editButton.textContent = 'Modifier';
+                editButton.className = 'edit-button';
+
+                // Ajouter un gestionnaire d'événements au clic sur le bouton "Modifier"
+                editButton.addEventListener('click', function() {
+                    let updatedTip = prompt("Modifier le conseil de voyage :", tip.textContent);
+
+                    if (updatedTip && updatedTip.trim() !== '') {
+                        tip.textContent = capitalizeFirstLetter(updatedTip.trim());
+                        addEditButtonToTip(tip);
+                        addDeleteButtonToTip(tip); 
+                    }
+                });
+                tip.appendChild(editButton);
+                
+            }
+            function addDeleteButtonToTip(tip) {
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Supprimer';
+                deleteButton.className = 'delete-button';
+
+                // Ajouter un gestionnaire d'événements au clic sur le bouton "Supprimer"
+                deleteButton.addEventListener('click', function() {
+                    const confirmation = confirm("Voulez-vous supprimer ce conseil de voyage ?");
+
+                    if (confirmation) {
+                        tip.remove();
+                    }
+                });
+
+                tip.appendChild(deleteButton);
+            }
+
+            // Fonction pour afficher les conseils de voyage basés sur la géolocalisation
+            function showTravelTips(position) {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+    
+                fetch(`https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=c67f02bf0fe34c3a8e7c65dda1f00645`)
+                .then(response => response.json())
+                .then(data => {
+                    const results = data.results[0].components;
+
+                    const addressLines = [
+                        `<p><strong>Votre position: </strong></p>`,
+                        `<p>Rue : ${results.house_number} ${results.road}</p>`,
+                        `<p>Code postal : ${results.postcode}</p>`,
+                        `<p>Région : ${results.state}</p>`,
+                        `<p>Ville : ${results.city}</p>`,
+                        `<p>Pays : ${results.country}</p>`
+                    ];
+
+                    const formattedAddress = addressLines.join('');
+
+                    const locationDiv = document.getElementById('location');
+                    locationDiv.innerHTML = `<div class="address">${formattedAddress}</div>`;
+                })
+                .catch(error => {
+                    console.error('Erreur lors de la récupération de l\'adresse :', error);
+                    const locationDiv = document.getElementById('location');
+                    locationDiv.innerHTML = '<p>Impossible de récupérer l\'adresse.</p>';
+                });
+    
+                let travelTips = [];
+    
+                if (latitude > 0 && longitude > 0) {
+                    travelTips = [
+                        "Visitez les musées locaux pour découvrir l'histoire de la région.",
+                        "Essayez les plats traditionnels de la région dans les restaurants locaux.",
+                        "Explorez les parcs naturels pour profiter de la beauté naturelle.",
+                        "Consultez les événements locaux pour découvrir la culture locale.",
+                        
+                    ];
+                } else {
+                    travelTips = [
+                        "Découvrez les sites touristiques populaires de la région.",
+                        "Recherchez des excursions en plein air pour profiter de l'environnement.",
+                        "Assistez à des événements culturels pour découvrir la vie locale."
+                    ];
+                }
+    
+                // Afficher les conseils de voyage dans la liste
+                travelTips.forEach(tip => {
+                    const li = document.createElement('li');
+                    li.textContent = tip;
+                    tipsList.appendChild(li);
+                    addEditButtonToTip(li);
+                    addDeleteButtonToTip(li); 
+                });
+            }
+    
+            // Fonction pour gérer les erreurs lors de l'obtention de la géolocalisation
+            function handleLocationError(error) {
+                let errorMessage = 'Erreur inconnue';
+    
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage = 'L\'utilisateur a refusé la demande de géolocalisation.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage = 'Les informations de géolocalisation ne sont pas disponibles.';
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage = 'La demande de géolocalisation a expiré.';
+                        break;
+                    case error.UNKNOWN_ERROR:
+                        errorMessage = 'Une erreur inconnue s\'est produite.';
+                        break;
+                }
+    
+                const locationDiv = document.getElementById('location');
+                locationDiv.innerHTML = `<p>Erreur de géolocalisation : ${errorMessage}</p>`;
+            }
+    
+            // Vérifier si le navigateur prend en charge la géolocalisation
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showTravelTips, handleLocationError);
+            } else {
+                const locationDiv = document.getElementById('location');
+                locationDiv.innerHTML = '<p>La géolocalisation n\'est pas prise en charge par votre navigateur.</p>';
+            }
+        </script>
+    </body>
+    </html>
+{% endif %}

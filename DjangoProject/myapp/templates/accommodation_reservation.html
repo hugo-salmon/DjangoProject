@@ -15,16 +15,16 @@
                     <li><a href="{% url 'base' %}">Accueil</a></li>
                     <li><a href="{% url 'flight_search' %}">Recherche de Vols</a></li>
                     <li><a href="{% url 'accommodation_reservation' %}">Réservation d'Hébergement</a></li>
-                    <li><a href="#itineraire-voyage">Itinéraire de Voyage</a></li>
-                    <li><a href="#conseils-voyage">Conseils de Voyage</a></li>
-                    <li><a href="{% url 'logout' %}">Déconnexion</a></li>
+                    <li><a href="{% url 'travel_itinerary' %}">Itinéraire de Voyage</a></li>
+                    <li><a href="{% url 'travel_tips' %}">Conseils de Voyage</a></li>
+                    <li><a href="{% url 'logout' %}" onclick="return confirm('Êtes-vous sûr de vouloir vous déconnecter ?')">Déconnexion</a></li>
                 </ul>
             </div>
         </nav>
 
         <div id="reservation-hebergement" class="tab-content">
             <h2>Réservation d'Hébergement</h2>
-            <form action="#" method="post">
+            <form action="{% url 'accommodation_reservation' %}" method="post">
                 {% csrf_token %}
                 <label for="destination">Destination :</label>
                 <input type="text" id="destination" name="destination" placeholder="Destination de votre séjour">
@@ -144,7 +144,6 @@
 <script>
     // Attend que le contenu de la page soit chargé avant d'exécuter le script
     document.addEventListener('DOMContentLoaded', function() {
-        // Récupère le formulaire, les lignes de tableau, le bouton de réinitialisation et le bouton de retour en haut de page
         const form = document.querySelector('form');
         const tableRows = document.querySelectorAll('tbody tr');
         const resetButton = document.getElementById('reset-button');
@@ -152,9 +151,8 @@
         const reserveButtons = document.querySelectorAll('.reserve-button');
         let foundResults = false;
 
-        // Événement lors de la soumission du formulaire de recherche
         form.addEventListener('submit', function(event) {
-            event.preventDefault(); // Empêche la soumission du formulaire par défaut
+            event.preventDefault(); 
 
             foundResults = false;
 
@@ -212,7 +210,7 @@
         resetButton.addEventListener('click', function(event) {
             window.location.reload(); 
         });
-        
+
         // Affiche ou masque le bouton de retour en haut de page en fonction de la position de défilement
         window.addEventListener('scroll', function() {
             if (window.pageYOffset > 100) {
